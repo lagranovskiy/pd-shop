@@ -1,0 +1,654 @@
+swagger: "2.0"
+info:
+  version: "0.0.1"
+  title: PRODYNA Shop
+# during dev, should point to your local machine
+host: localhost:3000
+basePath: /api
+schemes:
+  # tip: remove http to make production-grade
+  - http
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /category:
+    x-swagger-router-controller: category
+    get:
+      tags: 
+        - Oraganization
+      description:  Returns the flat list of the product categories
+      operationId: getCategories
+      responses:
+        "200":
+          description: Category List
+          schema: 
+            type: array
+            items:
+              $ref: '#/definitions/Category'
+    
+  '/category/{categoryId}':
+    x-swagger-router-controller: category
+    get:
+      tags: 
+        - Product
+        - Oraganization
+      description:  Returns products to the given category
+      operationId: getProductsByCategory
+      parameters:
+        - name: categoryId
+          in: path 
+          required: true
+          type: string
+
+        - name: limit
+          in: query
+          description: Limit of items to be returned
+          default: 10
+          type: integer
+
+        - name: startsAt
+          in: query
+          description: Index of item to be start iteration with
+          default: 0
+          type: integer
+          
+      responses:
+        "200":
+          description: product list
+          schema:
+            $ref: '#/definitions/ProductListResponse'
+            
+  /hashtag:
+    x-swagger-router-controller: hashtag
+    get:
+      tags: 
+        - Oraganization
+      description:  Returns the flat list of hash tags
+      operationId: getHashTags
+      responses:
+        "200":
+          description: Hash Tag List
+          schema:
+            type: array
+            items:
+              type: string
+            
+  '/hashtag/{hashtagName}':
+    x-swagger-router-controller: hashtag
+    get:
+      tags: 
+        - Oraganization
+        - Product
+      description:  Returns products to the given hash tag
+      operationId: getProductsByHashTags
+      parameters:
+        - name: hashtagName
+          in: path
+          type: string
+          required: true
+          
+        - name: limit
+          in: query
+          description: Limit of items to be returned
+          default: 10
+          type: integer
+
+        - name: startsAt
+          in: query
+          description: Index of item to be start iteration with
+          default: 0
+          type: integer
+      responses:
+        "200":
+          description: product list
+          schema:
+            $ref: '#/definitions/ProductListResponse'
+            
+  /product:
+    x-swagger-router-controller: product
+    get:
+      tags: 
+        - Product
+      description: Returns products matching to the given parameters
+      operationId: getProducts
+      parameters:
+        - name: mode
+          in: query
+          description: type of product search
+          required: false
+          default: bestseller
+          type: string  
+          enum:
+            - bestseller
+            - new
+        - name: limit
+          in: query
+          description: Limit of items to be returned
+          default: 10
+          type: integer
+          
+        - name: startsAt
+          in: query
+          description: Index of item to be start iteration with
+          default: 00
+          type: integer
+      responses:
+        "200":
+          description: Product List
+          schema:
+            $ref: '#/definitions/ProductListResponse'
+            
+  
+  '/product/{productId}':
+    x-swagger-router-controller: product
+    get:
+      tags: 
+        - Product
+      description: Returns product By given Id
+      operationId: getProductById
+      parameters:
+        - name: productId
+          in: path
+          description: Id of the product for the query
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Product Info
+          schema:
+            $ref: "#/definitions/Product"
+        "404":
+          description: If not found
+    put:
+      tags: 
+        - Product
+      description: Creates a new or updates existing product if found in the system
+      operationId: createOrUpdateProduct
+      parameters:
+        - name: productId
+          in: path
+          description: Id of the product for the query
+          required: true
+          type: string
+        - in: body
+          name: product
+          description: Product that need to be added or udpated 
+          required: true
+          schema:
+            $ref: '#/definitions/Product'
+      responses: 
+        "200":
+          description: Successfull added
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/Product"
+        "405":
+          description: Invalid input
+  
+  /customer:
+    x-swagger-router-controller: customer
+    get:
+      tags:
+        - Customer
+      description: Returns the customer object for the session. It can be the authenticated customer
+      operationId: getCustomerInfo
+      responses: 
+        "200":
+          description: Info about current customer
+          schema:
+            $ref: "#/definitions/Customer"
+        "403":
+          description: Customer not logged in
+         
+  /customer/orders:
+    x-swagger-router-controller: customer
+    get:
+      tags:
+        - Customer
+        - Order
+      description: Returns orders of the current authenticated customer
+      operationId: getCustomerOrders
+      responses:
+        "200":
+          description: Placed orders of the customer
+          schema:
+            type: array
+            items: 
+              $ref: "#/definitions/Order"
+              
+  /customer/address:
+    x-swagger-router-controller: customer
+    get:
+      tags:
+        - Customer
+        - Address
+      description: Returns the address items of the current authenticated customer
+      operationId: getCustomerAddressData
+      responses:
+        "200":
+          description: Used addresses of the customer
+          schema:
+            type: array
+            items: 
+              $ref: "#/definitions/AddressData"
+      
+  /customer/payment:
+    x-swagger-router-controller: customer
+    get:
+      tags:
+        - Customer
+        - Billing
+      description: Returns the saved payment infos of the current authenticated customer
+      operationId: getCustomerPaymentData
+      responses:
+        "200":
+          description: Used payment infos of the customer
+          schema:
+            type: array
+            items: 
+              $ref: "#/definitions/PaymentData"
+      
+  /order:
+    x-swagger-router-controller: order
+    post:
+      tags:
+        - Order
+      description: Place a new order
+      operationId: placeOrder
+      parameters:
+        - name: order
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/Order"
+      responses:
+        "200":
+          description: Successfull placed
+          schema:
+            type: string
+        "405":
+          description: Invalid input
+          
+  "/order/{orderId}":
+    x-swagger-router-controller: order
+    get:
+      tags:
+        - Order
+      description: Returns the information to the order by given order transaction Id
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          type: string
+      operationId: findOrder
+      responses:
+          "200":
+            description: Order information
+            schema:
+              $ref: "#/definitions/Order"
+              
+          "404":
+            description: Order not found
+            
+          "403":
+            description: Customer not authenticated to get order info
+    
+      
+    delete:
+      tags:
+        - Order
+      description: Cancel placed order. *Please* note it is only possible while order is not shipped
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          type: string
+      operationId: cancelOrder
+      responses:
+          "200":
+            description: Order was cancelled
+          
+          "404":
+            description: Order not found
+                
+          "403":
+            description: Operation not possible
+  
+  "/order/{orderId}/status":
+    x-swagger-router-controller: order
+    get:
+      tags:
+        - Order
+      description: Returns the short status information to the order by given order transaction Id
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          type: string
+      operationId: getOrderStatus
+      responses:
+          "200":
+            description: Order information
+            schema:
+              properties:
+                orderId:
+                  type: string
+                orderDate:
+                  type: string
+                  format: datetime 
+                orderStatus:
+                  type: string
+          "404":
+            description: Order not found
+  
+  /auth/signin:
+    x-swagger-router-controller: auth
+    post:
+      tags:
+        - Customer
+        - Util
+      description: process customer authentication
+      parameters:
+        - name: authRequest
+          in: body
+          required: true
+          schema: 
+            $ref: '#/definitions/SignInRequest'
+      responses:
+        "200":
+          description: Authentication successfull     
+        "403":
+          description: Authentication failed
+  
+  /auth/signup:
+    x-swagger-router-controller: auth
+    post: 
+      tags:
+        - Customer
+        - Util
+      description: Registration of a new customer in the system
+      parameters:
+        - name: signUpRequest
+          in: body
+          required: true
+          schema: 
+            $ref: '#/definitions/SignUpRequest'
+      responses:
+        "200":
+          description: Registration successfull     
+        "405":
+          description: Registration failed  
+          
+definitions:
+
+  SignInRequest:
+    type: object
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+        format: password
+
+  SignUpRequest:
+    type: object
+    allOf:
+      - $ref: "#/definitions/Customer"
+      - type: object
+    properties:
+      password:
+        type: string
+        format: password
+    required:
+      - password
+
+  ListMessage:
+    type: object
+    properties:
+      startsAt:
+        type: number
+        description: Index of element the result begins on
+      limit:
+        type: number
+        description: Max number of returned results
+        default: 10
+        maximum: 150
+      total:
+        type: number
+        description: Total number of results
+      
+  ProductListResponse:
+    allOf:
+      - $ref: '#/definitions/ListMessage'
+      - type: object
+    required:
+      - payload
+    properties:
+      payload:
+        type: array
+        items:
+          $ref: '#/definitions/Product'
+
+  Product:
+    type: object
+    description: Single product defintion
+    properties: 
+      productId:
+        type: string
+        description: UUID of the product
+      title:
+        type: string
+      desciption:
+        type: string
+      summary:
+        type: string
+      price:
+        type: number
+        format: float
+      lastSelled:
+        type: string
+        format: datetime
+      categories:
+        type: array
+        items:
+          $ref: '#/definitions/Category'
+      tags: 
+        type: array
+        items:
+          type: string
+      
+    required:    
+      - title
+      - price
+      - categories
+      
+  Category:
+    type: object
+    properties:
+      categoryId:
+        type: string
+      categoryName: 
+        type: string
+    required:
+      - categoryName
+  
+  AddressData:
+    type: object
+    properties:
+      addressId:
+        type: string
+      fullname:
+        type: string
+      street:
+        type: string
+      homenumber:
+        type: string
+      postalCode:
+        type: string
+      country:
+        type: string
+      phone:
+        type: string
+        
+  PaymentData:
+    type: object
+    properties:
+      paymentId:
+        type: string
+      type:
+        type: string
+        enum:
+          - PayPal
+          - CreditCard
+          - SEPA
+    required:
+      - type
+    discriminator:
+      type
+      
+  PayPal:
+    allOf:
+      - $ref: "#/definitions/PaymentData"
+      - type: object
+    properties:
+      paypalEmail:
+        type: string
+    required:
+      - paypalEmail
+  
+  CreditCard:
+    allOf:
+      - $ref: "#/definitions/PaymentData"
+      - type: object
+    properties:
+      cardHolder:
+        type: string
+      cardNumber:
+        type: string
+      cardType:
+        type: string
+        enum:
+          - VISA
+          - MasterCard
+          - AmericanExpress
+      cardCVS:
+        type: integer
+        format: int32
+        minLength: 3
+        maxLength: 4
+      cardValidTillMonth:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 12
+      cardValidTillYear:
+        type: integer
+        format: int32
+        minimum: 2015
+        maximum: 2025
+    required:
+      - cardValidTillYear
+      - cardValidTillMonth
+      - cardCVS
+      - cardType
+      - cardNumber
+      - cardHolder
+      
+  SEPA:
+    allOf:
+      - type: object
+      - $ref: "#/definitions/PaymentData"
+    properties:
+      IBAN:
+        type: string
+      BIC:
+        type: string
+    required:
+      - IBAN
+  
+  Customer:
+    type: object
+    properties:
+      customerId:
+        type: string
+        description: The unique id number of the customer
+      fullname:
+        type: string
+      company:
+        type: string
+      dob:
+        type: string
+        format: date
+      email:
+        type: string
+      phone:
+        type: string
+    required:
+      - fullname
+      - dob
+  
+  Order:
+    type: object
+    properties:
+      orderId:
+        type: string
+        description: The Unique Order ID
+      invoiceId:
+        type: number
+        description: The number of created invoice. Can be empty
+      orderDate:
+        type: string
+        format: datetime
+      paymentTransactionId:
+        type: string
+        description: The transaction id of 3rd party system for payment
+      paymentDate:
+        type: string
+        format: date
+      shippingNumber:
+        type: string
+        description: The shipping number of the shipping company
+      shippingDate: 
+        type: string
+        format: date 
+      orderTotalPrice:
+        type: number
+        format: float
+      orderStatus:
+        type: string
+        description: Current status in the text form
+      shippingInformation:
+        $ref: "#/definitions/AddressData"
+      billingInformation:
+        $ref: "#/definitions/AddressData"
+      paymentInformation:
+        $ref: "#/definitions/PaymentData"
+      orderItems:
+        type: array
+        items:
+          $ref: "#/definitions/OrderItem"
+    required:
+      - orderTotalPrice
+      - shippingInformation
+      - billingInformation
+      - paymentInformation
+      - orderItems
+      
+  OrderItem:
+    properties:
+      position:
+        type: integer
+        minimum: 1
+      count:
+        type: integer
+        minimum: 1
+      productId:
+        type: string
+    required:
+      - position
+      - count
+      - productId
+      
