@@ -317,25 +317,7 @@ paths:
           "403":
             description: Operation not possible
   
-  "/order/{orderId}/status":
-    x-swagger-router-controller: order
-    get:
-      tags:
-        - Order
-      description: Returns the short status information to the order by given order transaction Id
-      parameters:
-        - name: orderId
-          in: path
-          required: true
-          type: string
-      operationId: getOrderStatus
-      responses:
-          "200":
-            description: Order information
-            schema:
-             $ref: "#/definitions/OrderStatus"
-          "404":
-            description: Order not found
+ 
   
   /auth/signin:
     x-swagger-router-controller: auth
@@ -384,7 +366,6 @@ definitions:
         type: string
       password:
         type: string
-        format: password
 
   SignUpRequest:
     type: object
@@ -394,7 +375,6 @@ definitions:
     properties:
       password:
         type: string
-        format: password
     required:
       - password
 
