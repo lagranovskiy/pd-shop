@@ -646,7 +646,7 @@ definitions:
       - productId
       
   OrderStatus:
-     properties:
+    properties:
       orderId:
         type: string
       orderDate:
@@ -654,4 +654,6 @@ definitions:
         format: datetime 
       orderStatus:
         type: string
+    required:
+        - orderId
         
