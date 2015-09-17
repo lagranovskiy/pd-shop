@@ -333,14 +333,7 @@ paths:
           "200":
             description: Order information
             schema:
-              properties:
-                orderId:
-                  type: string
-                orderDate:
-                  type: string
-                  format: datetime 
-                orderStatus:
-                  type: string
+             $ref: "#/definitions/OrderStatus"
           "404":
             description: Order not found
   
@@ -652,3 +645,13 @@ definitions:
       - count
       - productId
       
+  OrderStatus:
+     properties:
+      orderId:
+        type: string
+      orderDate:
+        type: string
+        format: datetime 
+      orderStatus:
+        type: string
+        
