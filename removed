@@ -1,0 +1,59 @@
+ PayPal:
+    allOf:
+      - $ref: "#/definitions/PaymentData"
+      - type: object
+    properties:
+      paypalEmail:
+        type: string
+    required:
+      - paypalEmail
+  
+  CreditCard:
+    allOf:
+      - $ref: "#/definitions/PaymentData"
+      - type: object
+    properties:
+      cardHolder:
+        type: string
+      cardNumber:
+        type: string
+      cardType:
+        type: string
+        enum:
+          - VISA
+          - MasterCard
+          - AmericanExpress
+      cardCVS:
+        type: integer
+        format: int32
+        minLength: 3
+        maxLength: 4
+      cardValidTillMonth:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 12
+      cardValidTillYear:
+        type: integer
+        format: int32
+        minimum: 2015
+        maximum: 2025
+    required:
+      - cardValidTillYear
+      - cardValidTillMonth
+      - cardCVS
+      - cardType
+      - cardNumber
+      - cardHolder
+      
+  SEPA:
+    allOf:
+      - type: object
+      - $ref: "#/definitions/PaymentData"
+    properties:
+      IBAN:
+        type: string
+      BIC:
+        type: string
+    required:
+      - IBAN
